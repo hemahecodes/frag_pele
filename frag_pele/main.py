@@ -373,8 +373,10 @@ def grow_fragment(complex_pdb, fragment_pdb, core_atom, fragment_atom, iteration
     # Creating constraints
     const = "\n".join(constraints.retrieve_constraints(complex_pdb, {}, {}, 5, 5, 10))
     # Creating symbolic links
-    helpers.create_symlinks(data, os.path.join(working_dir, 'Data'))
-    helpers.create_symlinks(documents, os.path.join(working_dir, 'Documents'))
+    if data:
+        helpers.create_symlinks(data, os.path.join(working_dir, 'Data'))
+    if documents:
+        helpers.create_symlinks(documents, os.path.join(working_dir, 'Documents'))
     #  ---------------------------------------Pre-growing part - PREPARATION -------------------------------------------
     if cov_res:
         new_chain, resnum_core = complex_to_prody.read_residue_string(cov_res)
@@ -550,6 +552,7 @@ def grow_fragment(complex_pdb, fragment_pdb, core_atom, fragment_atom, iteration
         # ------SIMULATION PART------
         # Change directory to the working one
         os.chdir(working_dir)
+        print(working_dir)
         if debug:
             return 
         else:
@@ -631,6 +634,7 @@ def grow_fragment(complex_pdb, fragment_pdb, core_atom, fragment_atom, iteration
     if not (restart and os.path.exists("top_result")):
         logger.info(".....STARTING EQUILIBRATION.....")
         simulations_linker.simulation_runner(pele_dir, simulation_file, cpus)
+        print(simulation_file)
     os.chdir(curr_dir)
     equilibration_path = os.path.join(working_dir, "sampling_result")
     # SELECTION OF BEST STRUCTURES
