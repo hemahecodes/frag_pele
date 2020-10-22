@@ -1,5 +1,7 @@
 import frag_pele.Analysis.Helpers.reports_to_dataframe as r2d
+from matplotlib import cm
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import argparse
 
 
@@ -21,7 +23,9 @@ def parse_arguments():
     parser.add_argument("-y", default='Binding Energy',
                         help="Column of the report to be used as Y axis.")
     parser.add_argument("-c", default=None,
-                        help="Single color code or array to set colorbars (Z axis).")
+                        help="Single color code or array to set colorbars.")
+    parser.add_argument("-z", default=None,
+                        help="Column of the report to be used as Z axis (3D plot).")
     parser.add_argument("-hl", "--hline", default=None,
                         help="Draws an horizontal line parallel to X axis in the assigned Y position.")
     parser.add_argument("-vl", "--vline", default=None,
@@ -35,16 +39,21 @@ def parse_arguments():
 
     args = parser.parse_args()
 
-    return args.reports, args.x, args.y, args.c, args.hline, args.vline, args.title, args.xlabel, args.ylabel
+    return args.reports, args.x, args.y, args.c, args.z, args.hline, args.vline, args.title, args.xlabel, args.ylabel
 
 
-def plot_scatter(report_lists, x, y, c=None, hline=None, vline=None, title=None, xlab=None, ylab=None):
+def plot_scatter(report_lists, x, y, c=None, z=None, hline=None, vline=None, title=None, xlab=None, ylab=None):
     dataframe = r2d.report_to_df(report_lists)
     print(dataframe)
     if not c:
         plt.scatter(dataframe[x], dataframe[y])
-    else:
+    elif c and not z:
         dataframe.plot.scatter(x, y, c=c, colormap='jet')
+    elif c and z:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        col = ax.scatter(xs=dataframe[x], ys=dataframe[y], zs=dataframe[z], c=dataframe[c], cmap=cm.coolwarm)
+        fig.colorbar(col, shrink=0.5, aspect=5)
     if not title:
         plt.title("{} vs {}".format(x, y))
     else:
@@ -69,7 +78,7 @@ def plot_scatter(report_lists, x, y, c=None, hline=None, vline=None, title=None,
 
 
 if __name__ == '__main__':
-    reports, x, y, c, hline, vline, title, xlabel, ylabel = parse_arguments()
-    plot_scatter(reports, x, y, c, hline, vline, title, xlabel, ylabel)
+    reports, x, y, c, z, hline, vline, title, xlabel, ylabel = parse_arguments()
+    plot_scatter(reports, x, y, c, z, hline, vline, title, xlabel, ylabel)
 
 
